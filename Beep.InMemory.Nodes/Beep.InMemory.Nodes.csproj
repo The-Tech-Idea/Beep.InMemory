@@ -42,7 +42,7 @@
 		<Copy SourceFiles="$(TargetDir)$(PackageId).dll" DestinationFolder="$(ProjectDir)..\..\outputDLL\$(PackageId)\$(TargetFramework)" SkipUnchangedFiles="false" />
 	</Target>
   <ItemGroup>
-    <PackageReference Include="TheTechIdea.Beep.DataManagementModels" Version="1.0.115" />
+    <PackageReference Include="TheTechIdea.Beep.DataManagementModels" Version="1.0.116" />
     <PackageReference Include="TheTechIdea.Beep.Vis.Modules" Version="1.0.76" />
   </ItemGroup>
   <ItemGroup>
