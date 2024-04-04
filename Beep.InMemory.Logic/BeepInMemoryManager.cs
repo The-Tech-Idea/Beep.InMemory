@@ -1,4 +1,4 @@
-﻿using BeepEnterprize.Vis.Module;
+﻿using Beep.Vis.Module;
 using TheTechIdea.Beep;
 using TheTechIdea.Util;
 using DataManagementModels.DriversConfigurations;

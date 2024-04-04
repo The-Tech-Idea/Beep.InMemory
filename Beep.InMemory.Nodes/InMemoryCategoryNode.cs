@@ -1,4 +1,4 @@
-﻿using BeepEnterprize.Vis.Module;
+﻿using Beep.Vis.Module;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace  Beep.InMemory.Nodes
         }
 
         #region "Properties"
-        public object ParentBranch { get; set; }
+        public IBranch ParentBranch { get; set; }
         public string ObjectType { get; set; } = "Beep";
         public int ID { get; set; }
         public EntityStructure EntityStructure { get; set; }

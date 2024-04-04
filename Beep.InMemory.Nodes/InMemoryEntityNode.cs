@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using BeepEnterprize.Vis.Module;
+using Beep.Vis.Module;
 using TheTechIdea;
 using TheTechIdea.Beep;
 using TheTechIdea.Beep.DataBase;
@@ -41,7 +41,7 @@ namespace Beep.InMemory.Nodes
         public string DataSourceConnectionGuidID { get; set; }
         public string EntityGuidID { get; set; }
         public string MiscStringID { get; set; }
-        public object ParentBranch { get; set; }
+        public IBranch ParentBranch { get; set; }
         public int ID { get; set; }
         public EntityStructure EntityStructure { get; set; }
         public int Order { get; set; }

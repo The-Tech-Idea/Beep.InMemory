@@ -1,5 +1,5 @@
 ﻿using Beep.InMemory.Nodes;
-using BeepEnterprize.Vis.Module;
+using Beep.Vis.Module;
 using TheTechIdea.Beep.DataBase;
 using TheTechIdea.Beep.Vis;
 using TheTechIdea.Util;
@@ -30,7 +30,7 @@ namespace TheTechIdea.Beep
                     }
                     if (DataSource.ConnectionStatus == System.Data.ConnectionState.Open)
                     {
-                        if (Visutil.Controlmanager.InputBoxYesNo("Beep DM", "Are you sure, this might take some time?") == BeepEnterprize.Vis.Module.DialogResult.Yes)
+                        if (Visutil.Controlmanager.InputBoxYesNo("Beep DM", "Are you sure, this might take some time?") ==DialogResult.Yes)
                         {
                             passedArgs.Messege = "Connection Successful";
                             Visutil.PasstoWaitForm(passedArgs);
