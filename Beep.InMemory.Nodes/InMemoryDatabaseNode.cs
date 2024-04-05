@@ -1,5 +1,6 @@
 ﻿using Beep.Vis.Module;
 using DataManagementModels.DataBase;
+using System;
 using TheTechIdea;
 using TheTechIdea.Beep;
 using TheTechIdea.Beep.Addin;
@@ -128,48 +129,58 @@ namespace Beep.InMemory.Nodes
         }
         #endregion "Interface Methods"
         #region "Exposed Interface"
-        [CommandAttribute(Caption = "Get Data", Hidden = false, iconimage = "refresh.png")]
-        public IErrorsInfo GetData()
-        {
-
-            try
-            {
-                PassedArgs args=new PassedArgs();  
-                CancellationToken token = new CancellationToken();
-                args.Messege= $"Loadin InMemory Structure {DataSourceName}";
-                Visutil.ShowWaitForm(args);
-                Visutil.PasstoWaitForm(args);
-                var progress = new Progress<PassedArgs>(percent => {
-                   
-                    if(!string.IsNullOrEmpty(percent.Messege))
-                    {
-                        Visutil.PasstoWaitForm(percent);
-                    }
-                    if (percent.EventType == "Stop")
-                        {
-                            token.ThrowIfCancellationRequested();   
-                        }
-                    
-                });
-
-                memoryDB.LoadData(progress, token);
-                Visutil.CloseWaitForm();
-            }
-            catch (Exception ex)
-            {
-                string mes = "Could not Add Database Connection";
-                DMEEditor.AddLogMessage(ex.Message, mes, DateTime.Now, -1, mes, Errors.Failed);
-                Visutil.CloseWaitForm();
-            };
-            return DMEEditor.ErrorObject;
-        }
         [CommandAttribute(Caption = "Get Entities", Hidden = false, iconimage = "refresh.png")]
         public IErrorsInfo GetEntities()
         {
 
             try
             {
-                DataSourceDefaultMethods.GetEntities(this, DMEEditor, Visutil);
+                if(memoryDB==null)
+                {
+                    memoryDB = DMEEditor.GetDataSource(DataSourceName) as IInMemoryDB;
+                }
+                if(memoryDB==null)
+                {
+                    DMEEditor.AddLogMessage("Error", "Could not Get InMemory Database", DateTime.Now, -1, "Error", Errors.Failed);
+                    return DMEEditor.ErrorObject;
+                }
+                if(memoryDB.IsStructureCreated==false)
+                {
+                    PassedArgs args=new PassedArgs();  
+                    CancellationToken token = new CancellationToken();
+                    args.Messege= $"Loadin InMemory Structure {DataSourceName}";
+                    Visutil.ShowWaitForm(args);
+                    Visutil.PasstoWaitForm(args);
+                    var progress = new Progress<PassedArgs>(percent =>
+                    {
+                       
+                        if(!string.IsNullOrEmpty(percent.Messege))
+                        {
+                            Visutil.PasstoWaitForm(percent);
+                        }
+                        if (percent.EventType == "Stop")
+                        {
+                                token.ThrowIfCancellationRequested();   
+                            }
+                        
+                    });
+                    memoryDB.LoadStructure(progress, token);
+                    memoryDB.CreateStructure(progress, token);
+                    if(memoryDB.IsStructureCreated==true)
+                    {
+                        args.Messege = $"Loading InMemory Data {DataSourceName}";
+                        Visutil.PasstoWaitForm(args);
+                        memoryDB.LoadData(progress, token);
+                        memoryDB.IsLoaded = true;
+                    }
+                 
+                    Visutil.CloseWaitForm();
+                }
+                if(memoryDB.IsLoaded == true)
+                {
+                    DataSourceDefaultMethods.GetEntities(this, DMEEditor, Visutil);
+                }
+                
             }
             catch (Exception ex)
             {
