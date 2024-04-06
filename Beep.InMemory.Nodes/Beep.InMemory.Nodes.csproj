@@ -19,12 +19,14 @@
 	
 
 	<ItemGroup>
+	  <None Remove="GFX\getentities.png" />
 	  <None Remove="GFX\inmemorydatabase.png" />
 	  <None Remove="GFX\inmemoryentity.png" />
 	  <None Remove="GFX\inmemoryroot.png" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="GFX\getentities.png" />
 	  <EmbeddedResource Include="GFX\inmemoryroot.png" />
 	  <EmbeddedResource Include="GFX\inmemorydatabase.png" />
 	  <EmbeddedResource Include="GFX\inmemoryentity.png" />

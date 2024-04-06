@@ -147,7 +147,7 @@ namespace Beep.InMemory.Nodes
                 };
 
 
-                Visutil.ShowPage("crudmanager", Passedarguments);
+                Visutil.ShowPage("uc_crudView", Passedarguments);
 
 
 

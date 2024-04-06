@@ -129,7 +129,7 @@ namespace Beep.InMemory.Nodes
         }
         #endregion "Interface Methods"
         #region "Exposed Interface"
-        [CommandAttribute(Caption = "Get Entities", Hidden = false, iconimage = "refresh.png")]
+        [CommandAttribute(Caption = "Get Entities", Hidden = false, iconimage = "getentities.png")]
         public IErrorsInfo GetEntities()
         {
 
@@ -184,6 +184,76 @@ namespace Beep.InMemory.Nodes
                     DataSourceDefaultMethods.GetEntities(this, DMEEditor, Visutil);
                 }
                 Visutil.CloseWaitForm();
+            }
+            catch (Exception ex)
+            {
+                string mes = "Could not Add Database Connection";
+                DMEEditor.AddLogMessage(ex.Message, mes, DateTime.Now, -1, mes, Errors.Failed);
+            };
+            return DMEEditor.ErrorObject;
+        }
+        [CommandAttribute(Caption = "Refresh Data", Hidden = false, iconimage = "refresh.png")]
+        public IErrorsInfo RefreshData()
+        {
+
+            try
+            {
+                if (memoryDB == null)
+                {
+                    memoryDB = DMEEditor.GetDataSource(DataSourceName) as IInMemoryDB;
+                }
+                if (memoryDB == null)
+                {
+                    DMEEditor.AddLogMessage("Error", "Could not Get InMemory Database", DateTime.Now, -1, "Error", Errors.Failed);
+                    return DMEEditor.ErrorObject;
+                }
+               
+                    PassedArgs args = new PassedArgs();
+                    CancellationToken token = new CancellationToken();
+                    args.Messege = $"Loadin Data in InMemory  {DataSourceName}";
+                    Visutil.ShowWaitForm(args);
+                    Visutil.PasstoWaitForm(args);
+                    var progress = new Progress<PassedArgs>(percent =>
+                    {
+
+                        if (!string.IsNullOrEmpty(percent.Messege))
+                        {
+                            Visutil.PasstoWaitForm(percent);
+                        }
+                        if (percent.EventType == "Stop")
+                        {
+                            token.ThrowIfCancellationRequested();
+                        }
+
+                    });
+
+
+                    if(memoryDB.IsStructureCreated == false)
+                    {
+                        args.Messege = $"Creating structure InMemory  {DataSourceName}";
+                        Visutil.PasstoWaitForm(args);
+                        memoryDB.LoadStructure(progress, token);
+                        memoryDB.CreateStructure(progress, token);
+                    }
+               
+                    if (memoryDB.IsStructureCreated == true)
+                    {
+                        args.Messege = $"Loading InMemory Data {DataSourceName}";
+                        Visutil.PasstoWaitForm(args);
+                        memoryDB.LoadData(progress, token);
+                        memoryDB.IsLoaded = true;
+                    }
+
+
+               
+               
+                Visutil.CloseWaitForm();
+                if (memoryDB.IsLoaded == false)
+                {
+                    DMEEditor.AddLogMessage("Error", "Could not Load InMemory Data", DateTime.Now, -1, "Error", Errors.Failed);
+                    return DMEEditor.ErrorObject;
+                }
+               
             }
             catch (Exception ex)
             {
