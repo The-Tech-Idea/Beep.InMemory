@@ -164,6 +164,9 @@ namespace Beep.InMemory.Nodes
                             }
                         
                     });
+                   
+            
+                   
                     memoryDB.LoadStructure(progress, token);
                     memoryDB.CreateStructure(progress, token);
                     if(memoryDB.IsStructureCreated==true)
@@ -174,13 +177,13 @@ namespace Beep.InMemory.Nodes
                         memoryDB.IsLoaded = true;
                     }
                  
-                    Visutil.CloseWaitForm();
+                   
                 }
                 if(memoryDB.IsLoaded == true)
                 {
                     DataSourceDefaultMethods.GetEntities(this, DMEEditor, Visutil);
                 }
-                
+                Visutil.CloseWaitForm();
             }
             catch (Exception ex)
             {
