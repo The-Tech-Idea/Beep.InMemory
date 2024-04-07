@@ -169,13 +169,13 @@ namespace Beep.InMemory.Nodes
                    
                     memoryDB.LoadStructure(progress, token);
                     memoryDB.CreateStructure(progress, token);
-                    if(memoryDB.IsStructureCreated==true)
-                    {
-                        args.Messege = $"Loading InMemory Data {DataSourceName}";
-                        Visutil.PasstoWaitForm(args);
-                        memoryDB.LoadData(progress, token);
-                        memoryDB.IsLoaded = true;
-                    }
+                    //if(memoryDB.IsStructureCreated==true)
+                    //{
+                    //    args.Messege = $"Loading InMemory Data {DataSourceName}";
+                    //    Visutil.PasstoWaitForm(args);
+                    //    memoryDB.LoadData(progress, token);
+                    //    memoryDB.IsLoaded = true;
+                    //}
                  
                    
                 }
