@@ -6,7 +6,10 @@ using TheTechIdea.Beep.Addin;
 using TheTechIdea.Beep.DataBase;
 using TheTechIdea.Beep.Vis;
 using TheTechIdea.Util;
-
+using DataManagementModels.DriversConfigurations;
+using System.Reflection;
+using static TheTechIdea.Beep.Util;
+using DataManagementModels.DataBase;
 namespace  Beep.InMemory.Nodes
 {
     [AddinAttribute(Caption = "InMemory", Name = "InMemoryNode.Beep", misc = "Beep", iconimage = "inmemoryroot.png", menu = "DataSource", ObjectType ="Beep", Category = DatasourceCategory.INMEMORY)]
@@ -85,16 +88,53 @@ namespace  Beep.InMemory.Nodes
             {
                 if (Connection != null)
                 {
-                    InMemoryDatabaseNode database = new InMemoryDatabaseNode(TreeEditor, DMEEditor, this, Connection.ConnectionName, TreeEditor.SeqID, EnumPointType.DataPoint, Connection.ConnectionName);
-                    database.ConnectionProperties = Connection;
-                    TreeEditor.treeBranchHandler.AddBranch(this, database);
+                    ConnectionDriversConfig driversConfig = DMEEditor.Utilfunction.LinkConnection2Drivers(Connection);
+                    if (driversConfig != null)
+                    {
+                        AssemblyClassDefinition classDefinition = DMEEditor.ConfigEditor.BranchesClasses.FirstOrDefault(p => p.className.StartsWith(driversConfig.classHandler));
+                        ConstructorInfo ctor=null;
+                        if (classDefinition != null)
+                        {
+                            Type adc = DMEEditor.assemblyHandler.GetType(classDefinition.PackageName);
+                            try
+                            {
+                                ctor = adc.GetConstructors().Where(o => o.GetParameters().Length == 0).FirstOrDefault()!;
+                            }
+                            catch (Exception)
+                            {
 
-               //     ChildBranchs.Add(database);
+                            }
+                           
+                            ObjectActivator<IBranch> createdActivator = GetActivator<IBranch>(ctor);
+                            IBranch br = createdActivator();
+                            // set ConnectionProperties to the branch using reflection
+                            PropertyInfo prop = br.GetType().GetProperty("ConnectionProperties");
+                            prop.SetValue(br, Connection);
+                            // set other properties
+                            br.DMEEditor= DMEEditor;
+                            br.ID = TreeEditor.SeqID;
+                            br.BranchID = TreeEditor.SeqID;
+                            br.ParentBranchID = ID;
+                            br.BranchText = Connection.ConnectionName;
+                            br.DataSourceName = Connection.ConnectionName;
+                            IInMemoryDB memoryDB = DMEEditor.GetDataSource(Connection.ConnectionName) as IInMemoryDB;
+                            br.DataSource = (IDataSource)memoryDB;
+                            br.TreeEditor = TreeEditor;
+                            PropertyInfo propmemoryDB = br.GetType().GetProperty("memoryDB");
+                            propmemoryDB.SetValue(br, memoryDB);
+
+                            TreeEditor.treeBranchHandler.AddBranch(this, br);
+                        }
+                        else
+                        {
+
+                            InMemoryDatabaseNode database = new InMemoryDatabaseNode(TreeEditor, DMEEditor, this, Connection.ConnectionName, TreeEditor.SeqID, EnumPointType.DataPoint, Connection.ConnectionName);
+                            database.ConnectionProperties = Connection;
+                            TreeEditor.treeBranchHandler.AddBranch(this, database);
+                        }
+                    }
                 }
-               
-
-                //   DMEEditor.AddLogMessage("Success", "Added Database Connection", DateTime.Now, 0, null, Errors.Ok);
-            }
+           }
             catch (Exception ex)
             {
                 string mes = "Could not Add Database Connection";

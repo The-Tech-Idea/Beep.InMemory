@@ -198,6 +198,22 @@ namespace Beep.InMemory.Nodes
 
             try
             {
+                CancellationToken token = new CancellationToken();
+                PassedArgs args = new PassedArgs();
+                var progress = new Progress<PassedArgs>(percent =>
+                {
+
+                    if (!string.IsNullOrEmpty(percent.Messege))
+                    {
+                        Visutil.PasstoWaitForm(percent);
+                    }
+                    if (percent.EventType == "Stop")
+                    {
+                        token.ThrowIfCancellationRequested();
+                    }
+
+                });
+              
                 if (memoryDB == null)
                 {
                     memoryDB = DMEEditor.GetDataSource(DataSourceName) as IInMemoryDB;
@@ -207,62 +223,34 @@ namespace Beep.InMemory.Nodes
                     DMEEditor.AddLogMessage("Error", "Could not Get InMemory Database", DateTime.Now, -1, "Error", Errors.Failed);
                     return DMEEditor.ErrorObject;
                 }
-               
-                    PassedArgs args = new PassedArgs();
-                    CancellationToken token = new CancellationToken();
-                    args.Messege = $"Loadin Data in InMemory  {DataSourceName}";
-                    Visutil.ShowWaitForm(args);
-                    Visutil.PasstoWaitForm(args);
-                    var progress = new Progress<PassedArgs>(percent =>
-                    {
-
-                        if (!string.IsNullOrEmpty(percent.Messege))
-                        {
-                            Visutil.PasstoWaitForm(percent);
-                        }
-                        if (percent.EventType == "Stop")
-                        {
-                            token.ThrowIfCancellationRequested();
-                        }
-
-                    });
-
-
-                    if(memoryDB.IsStructureCreated == false)
-                    {
-                        args.Messege = $"Creating structure InMemory  {DataSourceName}";
-                        Visutil.PasstoWaitForm(args);
-                        memoryDB.LoadStructure(progress, token);
-                        memoryDB.CreateStructure(progress, token);
-                    }
-               
-                    if (memoryDB.IsStructureCreated == true)
-                    {
-                        args.Messege = $"Loading InMemory Data {DataSourceName}";
-                        Visutil.PasstoWaitForm(args);
-                        memoryDB.LoadData(progress, token);
-                        memoryDB.IsLoaded = true;
-                    }
-
-
-               
-               
-                Visutil.CloseWaitForm();
-                if (memoryDB.IsLoaded == false)
+                if (memoryDB.IsLoaded )
                 {
-                    DMEEditor.AddLogMessage("Error", "Could not Load InMemory Data", DateTime.Now, -1, "Error", Errors.Failed);
-                    return DMEEditor.ErrorObject;
+                    var retval =Visutil.Controlmanager.InputBoxYesNo("Warning", "This will refresh the data in memory, Do you want to continue?");
+                    if (retval == DialogResult.Yes)
+                    {
+                        args.Messege = $"Loadin Data in InMemory  {DataSourceName}";
+                        Visutil.ShowWaitForm(args);
+                        Visutil.PasstoWaitForm(args);
+                        memoryDB.RefreshData(progress, token);
+                        Visutil.CloseWaitForm();
+                    }
+                   
                 }
+                   
+
+              
+              
                
             }
             catch (Exception ex)
             {
+                Visutil.CloseWaitForm();
                 string mes = "Could not Add Database Connection";
                 DMEEditor.AddLogMessage(ex.Message, mes, DateTime.Now, -1, mes, Errors.Failed);
             };
             return DMEEditor.ErrorObject;
         }
-        [CommandAttribute(Caption = "Remove all", Hidden = false, iconimage = "remove.ico")]
+        [CommandAttribute(Caption = "Remove all", Hidden = false, iconimage = "remove.png")]
         public IErrorsInfo remove()
         {
 
