@@ -1,12 +1,18 @@
-﻿using Beep.Vis.Module;
+﻿
 using TheTechIdea.Beep;
-using TheTechIdea.Util;
-using DataManagementModels.DriversConfigurations;
+
 using TheTechIdea.Beep.DataBase;
 using TheTechIdea.Beep.Editor;
 using System.Data;
-using DataManagementModels.DataBase;
-using TheTechIdea;
+using TheTechIdea.Beep.Addin;
+using TheTechIdea.Beep.ConfigUtil;
+
+using TheTechIdea.Beep.Utilities;
+
+using TheTechIdea.Beep.Vis.Modules;
+using TheTechIdea.Beep.Logger;
+using TheTechIdea.Beep.DriversConfigurations;
+
 namespace Beep.InMemory.Logic
 {
     public static class BeepInMemoryManager

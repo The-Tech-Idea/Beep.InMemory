@@ -1,15 +1,15 @@
 ﻿using Beep.InMemory.Logic;
-using Beep.Vis.Module;
-using TheTechIdea;
 using TheTechIdea.Beep;
 using TheTechIdea.Beep.Addin;
 using TheTechIdea.Beep.DataBase;
 using TheTechIdea.Beep.Vis;
-using TheTechIdea.Util;
-using DataManagementModels.DriversConfigurations;
 using System.Reflection;
-using static TheTechIdea.Beep.Util;
-using DataManagementModels.DataBase;
+
+using TheTechIdea.Beep.ConfigUtil;
+using TheTechIdea.Beep.Editor;
+using TheTechIdea.Beep.Utilities;
+using TheTechIdea.Beep.Vis.Modules;
+
 namespace  Beep.InMemory.Nodes
 {
     [AddinAttribute(Caption = "InMemory", Name = "InMemoryNode.Beep", misc = "Beep", iconimage = "inmemoryroot.png", menu = "DataSource", ObjectType ="Beep", Category = DatasourceCategory.INMEMORY)]

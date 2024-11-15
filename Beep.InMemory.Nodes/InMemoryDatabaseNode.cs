@@ -1,12 +1,14 @@
-﻿using Beep.Vis.Module;
-using DataManagementModels.DataBase;
-using System;
-using TheTechIdea;
-using TheTechIdea.Beep;
+﻿using TheTechIdea.Beep.Vis;
 using TheTechIdea.Beep.Addin;
+using TheTechIdea.Beep.ConfigUtil;
+using TheTechIdea.Beep.Editor;
+using TheTechIdea.Beep.Utilities;
+using TheTechIdea.Beep.Vis.Modules;
+using TheTechIdea.Beep;
+
 using TheTechIdea.Beep.DataBase;
-using TheTechIdea.Beep.Vis;
-using TheTechIdea.Util;
+
+
 
 namespace Beep.InMemory.Nodes
 {
