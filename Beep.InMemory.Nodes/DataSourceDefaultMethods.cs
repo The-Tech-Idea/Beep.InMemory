@@ -13,7 +13,7 @@ namespace TheTechIdea.Beep
 {
     public static class DataSourceDefaultMethods
     {
-        public static IErrorsInfo RefreshEntities(IBranch DatabaseBranch,IDMEEditor DMEEditor, IVisManager Visutil)
+        public static IErrorsInfo RefreshEntities(IBranch DatabaseBranch,IDMEEditor DMEEditor, IAppManager Visutil)
         {
             ITree tree = (ITree)Visutil.Tree;
             string BranchText = DatabaseBranch.BranchText;
@@ -34,7 +34,7 @@ namespace TheTechIdea.Beep
                     }
                     if (DataSource.ConnectionStatus == System.Data.ConnectionState.Open)
                     {
-                        if (Visutil.Controlmanager.InputBoxYesNo("Beep DM", "Are you sure, this might take some time?") ==DialogResult.Yes)
+                        if (Visutil.DialogManager.InputBoxYesNo("Beep DM", "Are you sure, this might take some time?") == BeepDialogResult.OK)
                         {
                             passedArgs.Messege = "Connection Successful";
                             Visutil.PasstoWaitForm(passedArgs);
@@ -42,7 +42,7 @@ namespace TheTechIdea.Beep
                             Visutil.PasstoWaitForm(passedArgs);
                             //DataSource.Entities.Clear();
                             //DataSource.GetEntitesList();
-                            tree.treeBranchHandler.RemoveChildBranchs(DatabaseBranch);
+                            tree.Treebranchhandler.RemoveChildBranchs(DatabaseBranch);
                             int i = 0;
                             EntityStructure ent;
                             passedArgs.Messege = $"Getting {DataSource.EntitiesNames.Count} Entities Structures";
@@ -65,7 +65,7 @@ namespace TheTechIdea.Beep
                                     InMemoryDatabaseNode dbent = new InMemoryDatabaseNode(tree, DMEEditor, DatabaseBranch, tb, tree.SeqID, EnumPointType.Entity, iconimage);
                                     dbent.DataSourceName = DataSource.DatasourceName;
                                     dbent.DataSource = DataSource;
-                                    tree.treeBranchHandler.AddBranch(DatabaseBranch, dbent);
+                                    tree.Treebranchhandler.AddBranch(DatabaseBranch, dbent);
                                     i += 1;
                                 }
                             }
@@ -93,7 +93,7 @@ namespace TheTechIdea.Beep
             }
             return DMEEditor.ErrorObject;
         }
-        public static IErrorsInfo GetEntities(IBranch DatabaseBranch, IDMEEditor DMEEditor, IVisManager Visutil)
+        public static IErrorsInfo GetEntities(IBranch DatabaseBranch, IDMEEditor DMEEditor, IAppManager Visutil)
         {
             ITree tree = (ITree)Visutil.Tree;
             string BranchText = DatabaseBranch.BranchText;
@@ -138,7 +138,7 @@ namespace TheTechIdea.Beep
                                 InMemoryEntityNode dbent = new InMemoryEntityNode(tree, DMEEditor, DatabaseBranch, tb, tree.SeqID, EnumPointType.Entity, iconimage,DataSource);
                                 dbent.DataSourceName = DataSource.DatasourceName;
                                 dbent.DataSource = DataSource;
-                                tree.treeBranchHandler.AddBranch(DatabaseBranch, dbent);
+                                tree.Treebranchhandler.AddBranch(DatabaseBranch, dbent);
                                 i += 1;
                             }
                         }

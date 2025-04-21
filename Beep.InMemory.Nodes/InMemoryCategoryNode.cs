@@ -65,9 +65,11 @@ namespace  Beep.InMemory.Nodes
         public ITree TreeEditor { get; set; }
         public List<string> BranchActions { get; set; }
         public object TreeStrucure { get; set; }
-        public  IVisManager  Visutil { get; set; }
+        public  IAppManager  Visutil { get; set; }
         public int MiscID { get; set; }
         public bool IsDataSourceNode { get ; set; }=false;
+     
+        public string MenuID { get  ; set  ; }
 
 
         // public event EventHandler<PassedArgs> BranchSelected;
@@ -87,7 +89,7 @@ namespace  Beep.InMemory.Nodes
 
                 InMemoryDatabaseNode database = new InMemoryDatabaseNode(TreeEditor, DMEEditor, this, Connection.ConnectionName, TreeEditor.SeqID, EnumPointType.DataPoint, Connection.ConnectionName);
                 database.ConnectionProperties = Connection;
-                TreeEditor.treeBranchHandler.AddBranch(this, database);
+                TreeEditor.Treebranchhandler.AddBranch(this, database);
 
                // ChildBranchs.Add(database);
 

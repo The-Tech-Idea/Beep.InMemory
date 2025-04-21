@@ -9,6 +9,9 @@ using TheTechIdea.Beep.ConfigUtil;
 using TheTechIdea.Beep.Editor;
 using TheTechIdea.Beep.Utilities;
 using TheTechIdea.Beep.Vis.Modules;
+using TheTechIdea.Beep.DriversConfigurations;
+using static TheTechIdea.Beep.Utilities.Util;
+
 
 namespace  Beep.InMemory.Nodes
 {
@@ -68,9 +71,11 @@ namespace  Beep.InMemory.Nodes
         public ITree TreeEditor { get; set; }
         public List<string> BranchActions { get; set; }
         public object TreeStrucure { get; set; }
-        public  IVisManager  Visutil { get; set; }
+        public  IAppManager  Visutil { get; set; }
         public int MiscID { get; set; }
         public bool IsDataSourceNode { get ; set; }=false;
+      
+        public string MenuID { get  ; set  ; }
 
 
         // public event EventHandler<PassedArgs> BranchSelected;
@@ -124,14 +129,14 @@ namespace  Beep.InMemory.Nodes
                             PropertyInfo propmemoryDB = br.GetType().GetProperty("memoryDB");
                             propmemoryDB.SetValue(br, memoryDB);
 
-                            TreeEditor.treeBranchHandler.AddBranch(this, br);
+                            TreeEditor.Treebranchhandler.AddBranch(this, br);
                         }
                         else
                         {
 
                             InMemoryDatabaseNode database = new InMemoryDatabaseNode(TreeEditor, DMEEditor, this, Connection.ConnectionName, TreeEditor.SeqID, EnumPointType.DataPoint, Connection.ConnectionName);
                             database.ConnectionProperties = Connection;
-                            TreeEditor.treeBranchHandler.AddBranch(this, database);
+                            TreeEditor.Treebranchhandler.AddBranch(this, database);
                         }
                     }
                 }
@@ -150,7 +155,7 @@ namespace  Beep.InMemory.Nodes
             try
             {
                 Category = new InMemoryCategoryNode(TreeEditor, DMEEditor, this, p.FolderName, TreeEditor.SeqID, EnumPointType.Category, TreeEditor.CategoryIcon);
-                TreeEditor.treeBranchHandler.AddBranch(this, Category);
+                TreeEditor.Treebranchhandler.AddBranch(this, Category);
                 //ChildBranchs.Add(Category);
                 Category.CreateChildNodes();
 
@@ -174,7 +179,7 @@ namespace  Beep.InMemory.Nodes
                         // TreeEditor.treeBranchHandler.RemoveChildBranchs(this);
                         foreach (ConnectionProperties i in DMEEditor.ConfigEditor.DataConnections.Where(c => c.IsInMemory==true && c.Category== DatasourceCategory.INMEMORY))
                         {
-                            if (TreeEditor.treeBranchHandler.CheckifBranchExistinCategory(i.ConnectionName, "INMEMORY") == null)
+                            if (TreeEditor.Treebranchhandler.CheckifBranchExistinCategory(i.ConnectionName, "INMEMORY") == null)
                             {
                                 if (!ChildBranchs.Any(p => p.BranchText.Equals(i.ConnectionName, StringComparison.InvariantCultureIgnoreCase)))
                                 {

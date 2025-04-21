@@ -21,7 +21,7 @@ namespace Beep.InMemory.Logic
         public static string CurrentDbName { get; set; }
 
         // Creates an in-memory database connection
-        public static ConnectionProperties CreateInMemoryDB(IDMEEditor DMEEditor, IVisManager Vis)
+        public static ConnectionProperties CreateInMemoryDB(IDMEEditor DMEEditor, IAppManager Vis)
         {
             ConnectionProperties conn = null;
             try
@@ -33,12 +33,12 @@ namespace Beep.InMemory.Logic
                 List<string> ls = InMemoryDBs.Select(p => p.className).ToList();
 
                 // Prompt user to select an in-memory database provider
-                if (Vis.Controlmanager.InputComboBox("Beep", "Select InMemoryDB Provider", ls, ref classhandle) == DialogResult.OK)
+                if (Vis.DialogManager.InputComboBox("Beep", "Select InMemoryDB Provider", ls, ref classhandle) == BeepDialogResult.OK)
                 {
                     if (!string.IsNullOrEmpty(classhandle))
                     {
                         // Prompt user to enter a name for the database
-                        if (Vis.Controlmanager.InputBox("Beep", "Enter name for Database", ref dbname) == DialogResult.OK)
+                        if (Vis.DialogManager.InputBox("Beep", "Enter name for Database", ref dbname) == BeepDialogResult.OK)
                         {
                             if (!string.IsNullOrEmpty(dbname))
                             {
@@ -137,7 +137,7 @@ namespace Beep.InMemory.Logic
         }
 
         // Loads the structure of the in-memory database from a file
-        public static IErrorsInfo LoadStructure(IDMEEditor DMEEditor, IDataSource ds, string dbpath, IVisManager Vis)
+        public static IErrorsInfo LoadStructure(IDMEEditor DMEEditor, IDataSource ds, string dbpath, IAppManager Vis)
         {
             DMEEditor.ErrorObject.Flag = Errors.Ok;
             try

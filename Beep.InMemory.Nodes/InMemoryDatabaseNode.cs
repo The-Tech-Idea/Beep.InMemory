@@ -62,11 +62,13 @@ namespace Beep.InMemory.Nodes
         public ITree TreeEditor { get; set; }
         public List<string> BranchActions { get; set; }
         public object TreeStrucure { get; set; }
-        public IVisManager Visutil { get; set; }
+        public IAppManager Visutil { get; set; }
         public int MiscID { get; set; }
         IInMemoryDB memoryDB;
         public ConnectionProperties ConnectionProperties { get; set; }
         public bool IsDataSourceNode { get; set; } = false;
+     
+        public string MenuID { get  ; set  ; }
 
         // public event EventHandler<PassedArgs> BranchSelected;
         // public event EventHandler<PassedArgs> BranchDragEnter;
@@ -228,8 +230,8 @@ namespace Beep.InMemory.Nodes
                 }
                 if (memoryDB.IsLoaded )
                 {
-                    var retval =Visutil.Controlmanager.InputBoxYesNo("Warning", "This will refresh the data in memory, Do you want to continue?");
-                    if (retval == DialogResult.Yes)
+                    var retval =Visutil.DialogManager.InputBoxYesNo("Warning", "This will refresh the data in memory, Do you want to continue?");
+                    if (retval == BeepDialogResult.Yes)
                     {
                         args.Messege = $"Loadin Data in InMemory  {DataSourceName}";
                         Visutil.ShowWaitForm(args);
