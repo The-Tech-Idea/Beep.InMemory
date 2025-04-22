@@ -69,7 +69,7 @@ namespace  Beep.InMemory.Nodes
         public string BranchClass { get; set; } = "INMEMORY";
         public List<IBranch> ChildBranchs { get; set; } = new List<IBranch>();
         public ITree TreeEditor { get; set; }
-        public List<string> BranchActions { get; set; }
+        public List<string> BranchActions { get; set; } = new List<string>();
         public object TreeStrucure { get; set; }
         public  IAppManager  Visutil { get; set; }
         public int MiscID { get; set; }
@@ -126,6 +126,7 @@ namespace  Beep.InMemory.Nodes
                             IInMemoryDB memoryDB = DMEEditor.GetDataSource(Connection.ConnectionName) as IInMemoryDB;
                             br.DataSource = (IDataSource)memoryDB;
                             br.TreeEditor = TreeEditor;
+                            br.IconImageName = driversConfig.iconname;
                             PropertyInfo propmemoryDB = br.GetType().GetProperty("memoryDB");
                             propmemoryDB.SetValue(br, memoryDB);
 
@@ -136,6 +137,7 @@ namespace  Beep.InMemory.Nodes
 
                             InMemoryDatabaseNode database = new InMemoryDatabaseNode(TreeEditor, DMEEditor, this, Connection.ConnectionName, TreeEditor.SeqID, EnumPointType.DataPoint, Connection.ConnectionName);
                             database.ConnectionProperties = Connection;
+                            database.IconImageName = driversConfig.iconname;
                             TreeEditor.Treebranchhandler.AddBranch(this, database);
                         }
                     }

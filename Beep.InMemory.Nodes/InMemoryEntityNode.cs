@@ -62,9 +62,9 @@ namespace Beep.InMemory.Nodes
         public int ParentBranchID { get; set; }
         public string BranchDescription { get; set; }
         public string BranchClass { get; set; } = "INMEMORY";
-        public List<IBranch> ChildBranchs { get; set; }
+        public List<IBranch> ChildBranchs { get; set; } = new List<IBranch>();
         public ITree TreeEditor { get; set; }
-        public List<string> BranchActions { get; set; }
+        public List<string> BranchActions { get; set; } = new List<string>();
         public object TreeStrucure { get; set; }
         public IAppManager Visutil { get; set; }
         public string ObjectType { get; set; } = "Beep";
@@ -74,22 +74,23 @@ namespace Beep.InMemory.Nodes
 
         public IErrorsInfo CreateChildNodes()
         {
-            throw new NotImplementedException();
+           return DMEEditor.ErrorObject;
         }
 
         public IErrorsInfo ExecuteBranchAction(string ActionName)
         {
-            throw new NotImplementedException();
+          return DMEEditor.ErrorObject;
         }
 
         public IErrorsInfo MenuItemClicked(string ActionNam)
         {
-            throw new NotImplementedException();
+            return DMEEditor.ErrorObject;
+
         }
 
         public IErrorsInfo RemoveChildNodes()
         {
-            throw new NotImplementedException();
+            return DMEEditor.ErrorObject;
         }
 
         public IErrorsInfo SetConfig(ITree pTreeEditor, IDMEEditor pDMEEditor, IBranch pParentNode, string pBranchText, int pID, EnumPointType pBranchType, string pimagename)
@@ -191,39 +192,7 @@ namespace Beep.InMemory.Nodes
             };
             return DMEEditor.ErrorObject;
         }
-        //[BranchDelegate(Caption = "Copy Entity")]
-        //public IErrorsInfo CopyEntity()
-        //{
-
-        //    try
-        //    {
-        //        // IBranch pbr = TreeEditor.Branches.Where(x => x.BranchType == EnumBranchType.Root && x.BranchClass == "VIEW").FirstOrDefault();
-
-        //        EntityStructure = DataSource.GetEntityStructure(BranchText,true);
-
-        //        PassedArgs args = new PassedArgs
-        //        {
-        //            ObjectName = "DATABASE",
-        //            ObjectType = "TABLE",
-        //            EventType = "COPYENTITY",
-        //            ParameterString1 = "COPYENTITY",
-        //            DataSource=DataSource,
-        //            DatasourceName=DataSource.DatasourceName,
-        //            CurrentEntity=BranchText,
-        //            Objects = new List<ObjectItem> { new ObjectItem { Name = "Branch", obj = this }, new ObjectItem { Name = "Entity", obj = EntityStructure } }
-        //        };
-        //        TreeEditor.args = args;
-
-        //       // TreeEditor.SendActionFromBranchToBranch(pbr, this, "Create View using Table");
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        string mes = "Could not Copy entites ";
-        //        DMEEditor.AddLogMessage("Fail", mes + ex.Message, DateTime.Now, -1, mes, Errors.Failed);
-        //    };
-        //    return DMEEditor.ErrorObject;
-        //}
+    
 
         [CommandAttribute(Caption = "View Structure", Hidden = false, iconimage = "structure.png")]
         public IErrorsInfo ViewStructure()

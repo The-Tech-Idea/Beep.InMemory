@@ -60,7 +60,7 @@ namespace Beep.InMemory.Nodes
         public string BranchClass { get; set; } = "INMEMORY";
         public List<IBranch> ChildBranchs { get; set; } = new List<IBranch>();
         public ITree TreeEditor { get; set; }
-        public List<string> BranchActions { get; set; }
+        public List<string> BranchActions { get; set; } = new List<string>();
         public object TreeStrucure { get; set; }
         public IAppManager Visutil { get; set; }
         public int MiscID { get; set; }
