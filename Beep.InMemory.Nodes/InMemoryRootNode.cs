@@ -97,7 +97,7 @@ namespace  Beep.InMemory.Nodes
                     ConnectionDriversConfig driversConfig = DMEEditor.Utilfunction.LinkConnection2Drivers(Connection);
                     if (driversConfig != null)
                     {
-                        AssemblyClassDefinition classDefinition = DMEEditor.ConfigEditor.BranchesClasses.FirstOrDefault(p => p.className.StartsWith(driversConfig.classHandler));
+                        AssemblyClassDefinition classDefinition = DMEEditor.ConfigEditor.BranchesClasses.FirstOrDefault(p => p.classProperties!=null && p.classProperties.ClassType!=null && p.classProperties.ClassType.StartsWith(driversConfig.classHandler));
                         ConstructorInfo ctor=null;
                         if (classDefinition != null)
                         {
