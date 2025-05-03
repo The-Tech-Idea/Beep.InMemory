@@ -136,84 +136,84 @@ namespace Beep.InMemory.Logic
             }
         }
 
-        // Loads the structure of the in-memory database from a file
-        public static IErrorsInfo LoadStructure(IDMEEditor DMEEditor, IDataSource ds, string dbpath, IAppManager Vis)
-        {
-            DMEEditor.ErrorObject.Flag = Errors.Ok;
-            try
-            {
-                IInMemoryDB inds = (IInMemoryDB)ds;
-                string filepath = Path.Combine(dbpath, "createscripts.json");
-                string InMemoryStructuresfilepath = Path.Combine(dbpath, "InMemoryStructures.json");
-                ds.ConnectionStatus = ConnectionState.Open;
-                inds.InMemoryStructures = new List<EntityStructure>();
-                ds.Entities = new List<EntityStructure>();
-                ds.EntitiesNames = new List<string>();
-                CancellationTokenSource token = new CancellationTokenSource();
+        //// Loads the structure of the in-memory database from a file
+        //public static IErrorsInfo LoadStructure(IDMEEditor DMEEditor, IDataSource ds, string dbpath, IAppManager Vis)
+        //{
+        //    DMEEditor.ErrorObject.Flag = Errors.Ok;
+        //    try
+        //    {
+        //        IInMemoryDB inds = (IInMemoryDB)ds;
+        //        string filepath = Path.Combine(dbpath, "createscripts.json");
+        //        string InMemoryStructuresfilepath = Path.Combine(dbpath, "InMemoryStructures.json");
+        //        ds.ConnectionStatus = ConnectionState.Open;
+        //        inds.InMemoryStructures = new List<EntityStructure>();
+        //        ds.Entities = new List<EntityStructure>();
+        //        ds.EntitiesNames = new List<string>();
+        //        CancellationTokenSource token = new CancellationTokenSource();
 
-                // Load in-memory structures if they exist
-                if (File.Exists(InMemoryStructuresfilepath))
-                {
-                    inds.InMemoryStructures = DMEEditor.ConfigEditor.JsonLoader.DeserializeObject<EntityStructure>(InMemoryStructuresfilepath);
-                }
+        //        // Load in-memory structures if they exist
+        //        if (File.Exists(InMemoryStructuresfilepath))
+        //        {
+        //            inds.InMemoryStructures = DMEEditor.ConfigEditor.JsonLoader.DeserializeObject<EntityStructure>(InMemoryStructuresfilepath);
+        //        }
 
-                // Load create scripts if they exist
-                if (File.Exists(filepath))
-                {
-                    var hdr = DMEEditor.ConfigEditor.JsonLoader.DeserializeSingleObject<ETLScriptHDR>(filepath);
-                    DMEEditor.ETL.Script = hdr;
-                    DMEEditor.ETL.Script.LastRunDateTime = System.DateTime.Now;
-                    PassedArgs args = new PassedArgs();
-                    args.Messege = $"Loadin InMemory Structure {ds.DatasourceName}";
-                    Vis.ShowWaitForm(args);
-                    Vis.PasstoWaitForm(args);
-                    DMEEditor.progress = new Progress<PassedArgs>(percent => {
-                        Vis.PasstoWaitForm(args);
-                    });
-                    DMEEditor.ETL.RunCreateScript(DMEEditor.progress, token.Token);
-                    Vis.CloseWaitForm();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log any errors that occur during structure loading
-                DMEEditor.AddLogMessage("Beep", $"Could not Load InMemory Structure for {ds.DatasourceName}- {ex.Message}", System.DateTime.Now, 0, null, Errors.Failed);
-            }
-            return DMEEditor.ErrorObject;
-        }
+        //        // Load create scripts if they exist
+        //        if (File.Exists(filepath))
+        //        {
+        //            var hdr = DMEEditor.ConfigEditor.JsonLoader.DeserializeSingleObject<ETLScriptHDR>(filepath);
+        //            DMEEditor.ETL.Script = hdr;
+        //            DMEEditor.ETL.Script.LastRunDateTime = System.DateTime.Now;
+        //            PassedArgs args = new PassedArgs();
+        //            args.Messege = $"Loadin InMemory Structure {ds.DatasourceName}";
+        //            Vis.ShowWaitForm(args);
+        //            Vis.PasstoWaitForm(args);
+        //            DMEEditor.progress = new Progress<PassedArgs>(percent => {
+        //                Vis.PasstoWaitForm(args);
+        //            });
+        //            DMEEditor.ETL.RunCreateScript(DMEEditor.progress, token.Token);
+        //            Vis.CloseWaitForm();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log any errors that occur during structure loading
+        //        DMEEditor.AddLogMessage("Beep", $"Could not Load InMemory Structure for {ds.DatasourceName}- {ex.Message}", System.DateTime.Now, 0, null, Errors.Failed);
+        //    }
+        //    return DMEEditor.ErrorObject;
+        //}
 
-        // Saves the structure of the in-memory database to a file
-        public static IErrorsInfo SaveStructure(IDMEEditor DMEEditor, IDataSource ds, string dbpath)
-        {
-            DMEEditor.ErrorObject.Flag = Errors.Ok;
-            try
-            {
-                IInMemoryDB inds = (IInMemoryDB)ds;
-                if (inds.InMemoryStructures.Count > 0)
-                {
-                    // Create directory for saving files if it does not exist
-                    Directory.CreateDirectory(dbpath);
-                    string filepath = Path.Combine(dbpath, "createscripts.json");
-                    string InMemoryStructuresfilepath = Path.Combine(dbpath, "InMemoryStructures.json");
+        //// Saves the structure of the in-memory database to a file
+        //public static IErrorsInfo SaveStructure(IDMEEditor DMEEditor, IDataSource ds, string dbpath)
+        //{
+        //    DMEEditor.ErrorObject.Flag = Errors.Ok;
+        //    try
+        //    {
+        //        IInMemoryDB inds = (IInMemoryDB)ds;
+        //        if (inds.InMemoryStructures.Count > 0)
+        //        {
+        //            // Create directory for saving files if it does not exist
+        //            Directory.CreateDirectory(dbpath);
+        //            string filepath = Path.Combine(dbpath, "createscripts.json");
+        //            string InMemoryStructuresfilepath = Path.Combine(dbpath, "InMemoryStructures.json");
 
-                    // Create and serialize the ETL script header
-                    ETLScriptHDR scriptHDR = new ETLScriptHDR();
-                    scriptHDR.ScriptDTL = new List<ETLScriptDet>();
-                    CancellationTokenSource token = new CancellationTokenSource();
-                    scriptHDR.scriptName = ds.Dataconnection.ConnectionProp.Database;
-                    scriptHDR.scriptStatus = "SAVED";
-                    scriptHDR.ScriptDTL.AddRange(DMEEditor.ETL.GetCreateEntityScript(ds, inds.InMemoryStructures, DMEEditor.progress, token.Token));
-                    scriptHDR.ScriptDTL.AddRange(DMEEditor.ETL.GetCopyDataEntityScript(ds, inds.InMemoryStructures, DMEEditor.progress, token.Token));
-                    DMEEditor.ConfigEditor.JsonLoader.Serialize(filepath, scriptHDR);
-                    DMEEditor.ConfigEditor.JsonLoader.Serialize(InMemoryStructuresfilepath, inds.InMemoryStructures);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log any errors that occur during structure saving
-                DMEEditor.AddLogMessage("Beep", $"Could not save InMemory Structure for {ds.DatasourceName}- {ex.Message}", System.DateTime.Now, 0, null, Errors.Failed);
-            }
-            return DMEEditor.ErrorObject;
-        }
+        //            // Create and serialize the ETL script header
+        //            ETLScriptHDR scriptHDR = new ETLScriptHDR();
+        //            scriptHDR.ScriptDTL = new List<ETLScriptDet>();
+        //            CancellationTokenSource token = new CancellationTokenSource();
+        //            scriptHDR.scriptName = ds.Dataconnection.ConnectionProp.Database;
+        //            scriptHDR.scriptStatus = "SAVED";
+        //            scriptHDR.ScriptDTL.AddRange(DMEEditor.ETL.GetCreateEntityScript(ds, inds.InMemoryStructures, DMEEditor.progress, token.Token));
+        //            scriptHDR.ScriptDTL.AddRange(DMEEditor.ETL.GetCopyDataEntityScript(ds, inds.InMemoryStructures, DMEEditor.progress, token.Token));
+        //            DMEEditor.ConfigEditor.JsonLoader.Serialize(filepath, scriptHDR);
+        //            DMEEditor.ConfigEditor.JsonLoader.Serialize(InMemoryStructuresfilepath, inds.InMemoryStructures);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log any errors that occur during structure saving
+        //        DMEEditor.AddLogMessage("Beep", $"Could not save InMemory Structure for {ds.DatasourceName}- {ex.Message}", System.DateTime.Now, 0, null, Errors.Failed);
+        //    }
+        //    return DMEEditor.ErrorObject;
+        //}
     }
 }

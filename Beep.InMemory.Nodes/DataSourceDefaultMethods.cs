@@ -127,7 +127,7 @@ namespace TheTechIdea.Beep
                                 passedArgs.Messege = $"Fetching {tb} Entity Structure";
                                 Visutil.PasstoWaitForm(passedArgs);
                                 EntityStructure ent = DataSource.GetEntityStructure(tb, true);
-                                if (ent.Created == false)
+                                if (ent.IsCreated == false)
                                 {
                                     iconimage = "entitynotcreated.ico";
                                 }

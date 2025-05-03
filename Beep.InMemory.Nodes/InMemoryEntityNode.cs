@@ -297,7 +297,7 @@ namespace Beep.InMemory.Nodes
                     EntityStructure = DataSource.GetEntityStructure(BranchText, true);
                     if (EntityStructure != null)
                     {
-                        entityexist = DataSource.Entities[DataSource.GetEntityIdx(EntityStructure.EntityName)].Created;
+                        entityexist = DataSource.Entities[DataSource.GetEntityIdx(EntityStructure.EntityName)].IsCreated;
                         if (entityexist && DataSource.CheckEntityExist(EntityStructure.EntityName))
                         {
                             DataSource.ExecuteSql($"Drop Table {EntityStructure.DatasourceEntityName}");
