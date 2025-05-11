@@ -24,7 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="TheTechIdea.Beep.DataManagementModels" Version="2.0.63" />
+	  <PackageReference Include="TheTechIdea.Beep.DataManagementModels" Version="2.0.64" />
 	  <PackageReference Include="TheTechIdea.Beep.Vis.Modules" Version="1.0.139" />
 	</ItemGroup>
 	<Target Name="CopyPackage" AfterTargets="Pack">
