@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net7.0-windows;net8.0-windows</TargetFrameworks>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
      <UseWindowsForms>true</UseWindowsForms>
      <ImplicitUsings>enable</ImplicitUsings>
@@ -19,8 +19,26 @@
 	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
-	<Target Name="CopyPackage" AfterTargets="Pack">
-		<Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\..\..\LocalNugetFiles" />
+	<PropertyGroup>
+		<!-- Don’t pack on design-time builds -->
+		<GeneratePackageOnBuild Condition="'$(DesignTimeBuild)' != 'true'">True</GeneratePackageOnBuild>
+	</PropertyGroup>
+	<Target Name="CopyPackage" AfterTargets="Pack" Condition="'$(DesignTimeBuild)' != 'true'">
+		<PropertyGroup>
+			<_PkgName>$(PackageId).$(PackageVersion).nupkg</_PkgName>
+			<!-- Pack writes to $(PackageOutputPath); default is bin\<Configuration>\ -->
+			<_PkgPath>$(PackageOutputPath)\$(_PkgName)</_PkgPath>
+			<_Dest>$(ProjectDir)..\..\..\LocalNugetFiles</_Dest>
+		</PropertyGroup>
+
+		<!-- Ensure destination exists -->
+		<MakeDir Directories="$(_Dest)" Condition="!Exists('$(_Dest)')" />
+
+		<!-- Copy only if the package exists -->
+		<Copy SourceFiles="$(_PkgPath)"
+			  DestinationFolder="$(_Dest)"
+			  SkipUnchangedFiles="true"
+			  Condition="Exists('$(_PkgPath)')" />
 	</Target>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Copy SourceFiles="$(TargetDir)$(Assemblyname).dll" DestinationFolder="$(ProjectDir)..\..\outputDLL\$(Assemblyname)\$(TargetFramework)" SkipUnchangedFiles="false" />
