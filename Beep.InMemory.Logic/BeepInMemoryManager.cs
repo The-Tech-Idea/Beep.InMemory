@@ -12,6 +12,7 @@ using TheTechIdea.Beep.Utilities;
 using TheTechIdea.Beep.Vis.Modules;
 using TheTechIdea.Beep.Logger;
 using TheTechIdea.Beep.DriversConfigurations;
+using System.Net.Security;
 
 namespace Beep.InMemory.Logic
 {
@@ -31,7 +32,7 @@ namespace Beep.InMemory.Logic
                 string dbname = "";
                 string classhandle = "";
                 List<string> ls = InMemoryDBs.Select(p => p.className).ToList();
-
+                if(Vis.DialogManager==null) return null;
                 // Prompt user to select an in-memory database provider
                 if (Vis.DialogManager.InputComboBox("Beep", "Select InMemoryDB Provider", ls, ref classhandle) == BeepDialogResult.OK)
                 {
