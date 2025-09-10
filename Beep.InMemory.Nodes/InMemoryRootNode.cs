@@ -10,7 +10,8 @@ using TheTechIdea.Beep.Editor;
 using TheTechIdea.Beep.Utilities;
 using TheTechIdea.Beep.Vis.Modules;
 using TheTechIdea.Beep.DriversConfigurations;
-using static TheTechIdea.Beep.Utilities.Util;
+using static TheTechIdea.Beep.Utils.Util;
+
 
 
 namespace  Beep.InMemory.Nodes
