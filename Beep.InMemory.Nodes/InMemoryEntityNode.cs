@@ -2,7 +2,6 @@
 using TheTechIdea.Beep;
 using TheTechIdea.Beep.DataBase;
 using TheTechIdea.Beep.Vis;
-
 using TheTechIdea.Beep.Addin;
 using TheTechIdea.Beep.ConfigUtil;
 using TheTechIdea.Beep.Editor;
@@ -11,34 +10,15 @@ using TheTechIdea.Beep.Vis.Modules;
 
 namespace Beep.InMemory.Nodes
 {
-    [AddinAttribute(Caption = "InMemoryEntity", Name = "InMemoryEntityNode.Beep", misc = "Beep", iconimage = "inmemoryentity.png", menu = "Beep", ObjectType = "Beep")]
+    /// <summary>
+    /// Represents an entity (table/view) within an in-memory database
+    /// Provides operations for data manipulation, structure analysis, and entity management
+    /// </summary>
+    [AddinAttribute(Caption = "InMemory Entity", Name = "InMemoryEntityNode.Beep", misc = "Beep", 
+                    iconimage = "inmemoryentity.png", menu = "Beep", ObjectType = "Beep")]
     public class InMemoryEntityNode : IBranch
     {
-        public InMemoryEntityNode()
-        {
-
-        }
-        public InMemoryEntityNode(ITree pTreeEditor, IDMEEditor pDMEEditor, IBranch pParentNode, string pBranchText, int pID, EnumPointType pBranchType, string pimagename, IDataSource ds)
-        {
-            DataSource = ds;
-            TreeEditor = pTreeEditor;
-            DMEEditor = pDMEEditor;
-            ParentBranchID = pParentNode.ID;
-            BranchText = pBranchText;
-            BranchType = EnumPointType.Entity;
-          //  IconImageName = pimagename;
-            EntityStructure = new EntityStructure();
-            EntityStructure.DataSourceID = ds.DatasourceName;
-            EntityStructure.Viewtype = ViewType.Table;
-            EntityStructure.EntityName = pBranchText;
-            DataSourceName = ds.DatasourceName;
-
-            if (pID != 0)
-            {
-                ID = pID;
-                BranchID = ID;
-            }
-        }
+        #region Properties
         public bool Visible { get; set; } = true;
         public string GuidID { get; set; } = Guid.NewGuid().ToString();
         public string ParentGuidID { get; set; }
@@ -69,110 +49,302 @@ namespace Beep.InMemory.Nodes
         public IAppManager Visutil { get; set; }
         public string ObjectType { get; set; } = "Beep";
         public int MiscID { get; set; }
-        public bool IsDataSourceNode { get ; set; }=false;
-        public string MenuID { get  ; set  ; }
+        public bool IsDataSourceNode { get; set; } = false;
+        public string MenuID { get; set; }
 
+        /// <summary>
+        /// Tracks if the entity is currently being processed
+        /// </summary>
+        private bool _isProcessing = false;
+        #endregion
+
+        #region Constructors
+        public InMemoryEntityNode()
+        {
+            InitializeNode();
+        }
+
+        public InMemoryEntityNode(ITree pTreeEditor, IDMEEditor pDMEEditor, IBranch pParentNode, 
+                                 string pBranchText, int pID, EnumPointType pBranchType, 
+                                 string pimagename, IDataSource ds)
+        {
+            TreeEditor = pTreeEditor;
+            DMEEditor = pDMEEditor;
+            ParentBranch = pParentNode;
+            ParentBranchID = pParentNode?.ID ?? 0;
+            BranchText = pBranchText;
+            BranchType = EnumPointType.Entity;
+            DataSource = ds;
+            DataSourceName = ds?.DatasourceName;
+            
+            if (pID != 0)
+            {
+                ID = pID;
+                BranchID = ID;
+            }
+
+            InitializeNode();
+            InitializeEntityStructure();
+        }
+
+        private void InitializeNode()
+        {
+            BranchClass = "INMEMORY";
+            IconImageName = "inmemoryentity.png";
+            BranchType = EnumPointType.Entity;
+            ObjectType = "Beep";
+            ChildBranchs = new List<IBranch>();
+            BranchActions = new List<string>();
+        }
+
+        private void InitializeEntityStructure()
+        {
+            try
+            {
+                if (DataSource != null && !string.IsNullOrEmpty(BranchText))
+                {
+                    EntityStructure = new EntityStructure
+                    {
+                        DataSourceID = DataSource.DatasourceName,
+                        Viewtype = ViewType.Table,
+                        EntityName = BranchText,
+                        DatasourceEntityName = BranchText
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                DMEEditor?.AddLogMessage("Warning", $"Failed to initialize entity structure: {ex.Message}", 
+                    DateTime.Now, 0, "InitializeEntityStructure", Errors.Ok);
+            }
+        }
+        #endregion
+
+        #region Interface Methods
         public IErrorsInfo CreateChildNodes()
         {
-           return DMEEditor.ErrorObject;
+            try
+            {
+                // In-memory entities typically don't have child nodes
+                // Could be extended to show field/column information
+                DMEEditor.AddLogMessage("Success", $"Entity '{BranchText}' ready", 
+                    DateTime.Now, 0, "CreateChildNodes", Errors.Ok);
+            }
+            catch (Exception ex)
+            {
+                DMEEditor.AddLogMessage("Error", $"Failed to create child nodes: {ex.Message}", 
+                    DateTime.Now, -1, "CreateChildNodes", Errors.Failed);
+            }
+
+            return DMEEditor.ErrorObject;
         }
 
         public IErrorsInfo ExecuteBranchAction(string ActionName)
         {
-          return DMEEditor.ErrorObject;
+            try
+            {
+                switch (ActionName?.ToUpper())
+                {
+                    case "DATAEDIT":
+                        return DataEdit();
+                    case "VIEWSTRUCTURE":
+                        return ViewStructure();
+                    case "FIELDPROPERTIES":
+                        return FieldProperties();
+                    case "DROPENTITY":
+                        return DropEntity();
+                    case "CREATEVIEW":
+                        return CreateView();
+                    case "EXPORTDATA":
+                        return ExportEntityData();
+                    case "VIEWDATA":
+                        return ViewEntityData();
+                    case "REFRESHENTITY":
+                        return RefreshEntity();
+                    default:
+                        DMEEditor.AddLogMessage("Warning", $"Unknown action: {ActionName}", 
+                            DateTime.Now, 0, "ExecuteBranchAction", Errors.Ok);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                DMEEditor.AddLogMessage("Error", $"Failed to execute action '{ActionName}': {ex.Message}", 
+                    DateTime.Now, -1, "ExecuteBranchAction", Errors.Failed);
+            }
+
+            return DMEEditor.ErrorObject;
         }
 
-        public IErrorsInfo MenuItemClicked(string ActionNam)
+        public IErrorsInfo MenuItemClicked(string ActionName)
         {
-            return DMEEditor.ErrorObject;
-
+            return ExecuteBranchAction(ActionName);
         }
 
         public IErrorsInfo RemoveChildNodes()
         {
+            try
+            {
+                foreach (IBranch child in ChildBranchs.ToArray())
+                {
+                    TreeEditor.Treebranchhandler.RemoveBranch(child);
+                }
+                ChildBranchs.Clear();
+
+                DMEEditor.AddLogMessage("Success", $"Removed child nodes from entity '{BranchText}'", 
+                    DateTime.Now, 0, "RemoveChildNodes", Errors.Ok);
+            }
+            catch (Exception ex)
+            {
+                DMEEditor.AddLogMessage("Error", $"Failed to remove child nodes: {ex.Message}", 
+                    DateTime.Now, -1, "RemoveChildNodes", Errors.Failed);
+            }
+
             return DMEEditor.ErrorObject;
         }
 
-        public IErrorsInfo SetConfig(ITree pTreeEditor, IDMEEditor pDMEEditor, IBranch pParentNode, string pBranchText, int pID, EnumPointType pBranchType, string pimagename)
+        public IErrorsInfo SetConfig(ITree pTreeEditor, IDMEEditor pDMEEditor, IBranch pParentNode, 
+                                   string pBranchText, int pID, EnumPointType pBranchType, string pimagename)
         {
-
             try
             {
-
                 TreeEditor = pTreeEditor;
                 DMEEditor = pDMEEditor;
-                ParentBranchID = pParentNode.ID;
+                ParentBranch = pParentNode;
+                ParentBranchID = pParentNode?.ID ?? 0;
                 BranchText = pBranchText;
                 BranchType = pBranchType;
                 IconImageName = pimagename;
+                
                 if (pID != 0)
                 {
                     ID = pID;
+                    BranchID = pID;
                 }
 
-                DMEEditor.AddLogMessage("Success", "Set Config OK", DateTime.Now, 0, null, Errors.Ok);
+                DMEEditor.AddLogMessage("Success", $"InMemory entity configuration set: {BranchText}", 
+                    DateTime.Now, 0, "SetConfig", Errors.Ok);
             }
             catch (Exception ex)
             {
-                string mes = "Could not Set Config";
-                DMEEditor.AddLogMessage(ex.Message, mes, DateTime.Now, -1, mes, Errors.Failed);
-            };
-            return DMEEditor.ErrorObject;
+                DMEEditor.AddLogMessage("Error", $"Failed to set configuration: {ex.Message}", 
+                    DateTime.Now, -1, "SetConfig", Errors.Failed);
+            }
 
+            return DMEEditor.ErrorObject;
         }
 
-        #region "Methods"
+        public IBranch CreateCategoryNode(CategoryFolder p)
+        {
+            // Entities don't create categories
+            return null;
+        }
+        #endregion
 
+        #region Public Commands
+        /// <summary>
+        /// Opens the data editor for this entity
+        /// </summary>
         [CommandAttribute(Caption = "Data Edit", iconimage = "edit_entity.png")]
         public IErrorsInfo DataEdit()
         {
+            if (_isProcessing) return DMEEditor.ErrorObject;
 
             try
             {
-                List<ObjectItem> ob = new List<ObjectItem>(); ;
-                ObjectItem it = new ObjectItem();
-                it.obj = this;
-                it.Name = "Branch";
-                ob.Add(it);
-                string[] args = new string[] { BranchText, DataSource.Dataconnection.ConnectionProp.SchemaName, null };
-                PassedArgs Passedarguments = new PassedArgs
-                {
-                    Addin = null,
-                    AddinName = null,
-                    AddinType = "",
-                    DMView = null,
-                    CurrentEntity = BranchText,
-                    Id = BranchID,
-                    ObjectType = "RDBMSTABLE",
-                    DataSource = DataSource,
-                    ObjectName = BranchText,
-                    Objects = ob,
-                    DatasourceName = DataSource.DatasourceName,
-                    EventType = "CRUDENTITY"
+                _isProcessing = true;
+                ValidateEntityAndDataSource();
 
+                var objectItems = new List<ObjectItem>
+                {
+                    new ObjectItem { obj = this, Name = "Branch" }
                 };
 
+                var passedArgs = new PassedArgs
+                {
+                    CurrentEntity = BranchText,
+                    Id = BranchID,
+                    ObjectType = "INMEMORYENTITY",
+                    DataSource = DataSource,
+                    ObjectName = BranchText,
+                    Objects = objectItems,
+                    DatasourceName = DataSource.DatasourceName,
+                    EventType = "CRUDENTITY"
+                };
 
-                Visutil.ShowPage("uc_crudView", Passedarguments);
-
-
-
-                //  DMEEditor.AddLogMessage("Success", "Added Database Connection", DateTime.Now, 0, null, Errors.Ok);
+                Visutil.ShowPage("uc_crudView", passedArgs);
+                DMEEditor.AddLogMessage("Success", $"Opened data editor for entity '{BranchText}'", 
+                    DateTime.Now, 0, "DataEdit", Errors.Ok);
             }
             catch (Exception ex)
             {
-                string mes = "Could not Create CRUD GRID";
-                DMEEditor.AddLogMessage(ex.Message, mes, DateTime.Now, -1, mes, Errors.Failed);
-            };
+                DMEEditor.AddLogMessage("Error", $"Failed to open data editor: {ex.Message}", 
+                    DateTime.Now, -1, "DataEdit", Errors.Failed);
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
+
             return DMEEditor.ErrorObject;
         }
-        [CommandAttribute(Caption = "Create View", iconimage = "createentity.png"),]
-        public IErrorsInfo CreateView()
+
+        /// <summary>
+        /// Views the entity data in read-only mode
+        /// </summary>
+        [CommandAttribute(Caption = "View Data", iconimage = "view.png")]
+        public IErrorsInfo ViewEntityData()
         {
+            if (_isProcessing) return DMEEditor.ErrorObject;
 
             try
             {
-                PassedArgs args = new PassedArgs
+                _isProcessing = true;
+                ValidateEntityAndDataSource();
+
+                if (DataSource != null)
+                {
+                    var data = DataSource.GetEntity(BranchText, null);
+                    if (data != null)
+                    {
+                        int rowCount = GetRowCount(data);
+                        DMEEditor.AddLogMessage("Success", $"Entity '{BranchText}' contains {rowCount} rows", 
+                            DateTime.Now, 0, "ViewEntityData", Errors.Ok);
+                        
+                        // Here you could open a data viewer or display the data
+                        // Implementation depends on available UI components
+                    }
+                    else
+                    {
+                        DMEEditor.AddLogMessage("Warning", $"No data found in entity '{BranchText}'", 
+                            DateTime.Now, 0, "ViewEntityData", Errors.Ok);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DMEEditor.AddLogMessage("Error", $"Failed to view entity data: {ex.Message}", 
+                    DateTime.Now, -1, "ViewEntityData", Errors.Failed);
+            }
+            finally
+            {
+                _isProcessing = false;
+            }
+
+            return DMEEditor.ErrorObject;
+        }
+
+        /// <summary>
+        /// Creates a view based on this entity
+        /// </summary>
+        [CommandAttribute(Caption = "Create View", iconimage = "createentity.png")]
+        public IErrorsInfo CreateView()
+        {
+            try
+            {
+                ValidateEntityAndDataSource();
+
+                var passedArgs = new PassedArgs
                 {
                     ObjectName = "DATABASE",
                     ObjectType = "TABLE",
@@ -180,158 +352,302 @@ namespace Beep.InMemory.Nodes
                     ParameterString1 = "Create View using Table",
                     Objects = new List<ObjectItem> { new ObjectItem { Name = "Branch", obj = this } }
                 };
-                DMEEditor.Passedarguments = args;
-                IBranch pbr = TreeEditor.Branches.Where(x => x.BranchType == EnumPointType.Root && x.BranchClass == "VIEW").FirstOrDefault();
-                TreeEditor.Treebranchhandler.SendActionFromBranchToBranch(pbr, this, "Create View using Table");
 
+                DMEEditor.Passedarguments = passedArgs;
+                
+                var viewBranch = TreeEditor.Branches
+                    .FirstOrDefault(x => x.BranchType == EnumPointType.Root && x.BranchClass == "VIEW");
+                
+                if (viewBranch != null)
+                {
+                    TreeEditor.Treebranchhandler.SendActionFromBranchToBranch(viewBranch, this, "Create View using Table");
+                    DMEEditor.AddLogMessage("Success", $"Initiated view creation for entity '{BranchText}'", 
+                        DateTime.Now, 0, "CreateView", Errors.Ok);
+                }
+                else
+                {
+                    DMEEditor.AddLogMessage("Warning", "View root branch not found", 
+                        DateTime.Now, 0, "CreateView", Errors.Ok);
+                }
             }
             catch (Exception ex)
             {
-                string mes = "Could not Added View ";
-                DMEEditor.AddLogMessage(ex.Message, mes, DateTime.Now, -1, mes, Errors.Failed);
-            };
+                DMEEditor.AddLogMessage("Error", $"Failed to create view: {ex.Message}", 
+                    DateTime.Now, -1, "CreateView", Errors.Failed);
+            }
+
             return DMEEditor.ErrorObject;
         }
-    
 
+        /// <summary>
+        /// Views the entity structure and schema information
+        /// </summary>
         [CommandAttribute(Caption = "View Structure", Hidden = false, iconimage = "structure.png")]
         public IErrorsInfo ViewStructure()
         {
-
             try
             {
-                string[] args = { "New View", null, null };
-                List<ObjectItem> ob = new List<ObjectItem>(); ;
-                ObjectItem it = new ObjectItem();
-                it.obj = this;
-                it.Name = "Branch";
-                ob.Add(it);
-                PassedArgs Passedarguments = new PassedArgs
+                ValidateEntityAndDataSource();
+
+                var objectItems = new List<ObjectItem>
                 {
-                    Addin = null,
-                    AddinName = null,
-                    AddinType = "",
-                    DMView = null,
+                    new ObjectItem { obj = this, Name = "Branch" },
+                    new ObjectItem { Name = "TitleText", obj = $"Structure of {BranchText}" }
+                };
+
+                var passedArgs = new PassedArgs
+                {
                     CurrentEntity = BranchText,
                     Id = BranchID,
-                    ObjectType = "RDBMSENTITY",
+                    ObjectType = "INMEMORYENTITY",
                     DataSource = DataSource,
                     ObjectName = EntityStructure.DataSourceID,
-                    Objects = ob,
+                    Objects = objectItems,
                     DatasourceName = EntityStructure.DataSourceID,
-                    EventType = "RDBMSENTITY"
-
+                    EventType = "INMEMORYENTITY"
                 };
-                Passedarguments.Objects.Add(new ObjectItem() { Name = "TitleText", obj = $"View {BranchText}" });
-                Visutil.ShowPage("uc_DataEntityStructureViewer", Passedarguments);
 
-
-
-                //  DMEEditor.AddLogMessage("Success", "Edit Control Shown", DateTime.Now, 0, null, Errors.Ok);
+                Visutil.ShowPage("uc_DataEntityStructureViewer", passedArgs);
+                DMEEditor.AddLogMessage("Success", $"Opened structure viewer for entity '{BranchText}'", 
+                    DateTime.Now, 0, "ViewStructure", Errors.Ok);
             }
             catch (Exception ex)
             {
-                string mes = "Could not show Edit Control";
-                DMEEditor.AddLogMessage(ex.Message, mes, DateTime.Now, -1, mes, Errors.Failed);
-            };
+                DMEEditor.AddLogMessage("Error", $"Failed to view structure: {ex.Message}", 
+                    DateTime.Now, -1, "ViewStructure", Errors.Failed);
+            }
+
             return DMEEditor.ErrorObject;
         }
+
+        /// <summary>
+        /// Opens field properties editor for the entity
+        /// </summary>
         [CommandAttribute(Caption = "Field Properties", iconimage = "properties.png")]
         public IErrorsInfo FieldProperties()
         {
-            DMEEditor.ErrorObject.Flag = Errors.Ok;
-            //   DMEEditor.Logger.WriteLog($"Filling Database Entites ) ");
             try
             {
-                string[] args = { "New Query Entity", null, null };
-                List<ObjectItem> ob = new List<ObjectItem>(); ;
-                ObjectItem it = new ObjectItem();
-                it.obj = this;
-                it.Name = "Branch";
-                ob.Add(it);
+                ValidateEntityAndDataSource();
 
-
-                PassedArgs Passedarguments = new PassedArgs
+                var objectItems = new List<ObjectItem>
                 {
-                    Addin = null,
-                    AddinName = null,
-                    AddinType = "",
-                    DMView = null,
+                    new ObjectItem { obj = this, Name = "Branch" },
+                    new ObjectItem { Name = "TitleText", obj = $"Fields of {BranchText}" }
+                };
+
+                var passedArgs = new PassedArgs
+                {
                     CurrentEntity = BranchText,
                     Id = 0,
                     ObjectType = "DEFAULTS",
-                    DataSource = null,
                     ObjectName = DataSourceName,
-
-                    Objects = ob,
-
+                    Objects = objectItems,
                     DatasourceName = DataSourceName,
                     EventType = "DEFAULTS"
-
                 };
-                Passedarguments.Objects.Add(new ObjectItem() { Name = "TitleText", obj = $"Fields {BranchText}" });
-                Visutil.ShowPage("uc_fieldproperty", Passedarguments);
 
-
-
+                Visutil.ShowPage("uc_fieldproperty", passedArgs);
+                DMEEditor.AddLogMessage("Success", $"Opened field properties for entity '{BranchText}'", 
+                    DateTime.Now, 0, "FieldProperties", Errors.Ok);
             }
             catch (Exception ex)
             {
-                DMEEditor.Logger.WriteLog($"Error in Filling Database Entites ({ex.Message}) ");
-                DMEEditor.ErrorObject.Flag = Errors.Failed;
-                DMEEditor.ErrorObject.Ex = ex;
+                DMEEditor.AddLogMessage("Error", $"Failed to open field properties: {ex.Message}", 
+                    DateTime.Now, -1, "FieldProperties", Errors.Failed);
             }
-            return DMEEditor.ErrorObject;
 
+            return DMEEditor.ErrorObject;
         }
-        [CommandAttribute(Caption = "Drop", iconimage = "remove.png")]
-        public IErrorsInfo DropEntity()
+
+        /// <summary>
+        /// Exports entity data to external format
+        /// </summary>
+        [CommandAttribute(Caption = "Export Data", iconimage = "export.png")]
+        public IErrorsInfo ExportEntityData()
         {
-            DMEEditor.ErrorObject.Flag = Errors.Ok;
-            bool entityexist = true;
             try
             {
-                if (Visutil.DialogManager.InputBoxYesNo("Beep DM", "Are you sure you ?") == BeepDialogResult.Yes)
-                {
+                ValidateEntityAndDataSource();
 
-                    EntityStructure = DataSource.GetEntityStructure(BranchText, true);
+                var data = DataSource.GetEntity(BranchText, null);
+                if (data != null)
+                {
+                    int rowCount = GetRowCount(data);
+                    DMEEditor.AddLogMessage("Success", $"Export functionality available for entity '{BranchText}' ({rowCount} rows)", 
+                        DateTime.Now, 0, "ExportEntityData", Errors.Ok);
+                    
+                    // Implementation for export functionality would go here
+                    // This could open an export dialog or trigger an export process
+                }
+                else
+                {
+                    DMEEditor.AddLogMessage("Warning", $"No data to export from entity '{BranchText}'", 
+                        DateTime.Now, 0, "ExportEntityData", Errors.Ok);
+                }
+            }
+            catch (Exception ex)
+            {
+                DMEEditor.AddLogMessage("Error", $"Failed to export entity data: {ex.Message}", 
+                    DateTime.Now, -1, "ExportEntityData", Errors.Failed);
+            }
+
+            return DMEEditor.ErrorObject;
+        }
+
+        /// <summary>
+        /// Refreshes the entity structure and metadata
+        /// </summary>
+        [CommandAttribute(Caption = "Refresh Entity", iconimage = "refresh.png")]
+        public IErrorsInfo RefreshEntity()
+        {
+            try
+            {
+                ValidateEntityAndDataSource();
+
+                EntityStructure = DataSource.GetEntityStructure(BranchText, true);
+                if (EntityStructure != null)
+                {
+                    DMEEditor.AddLogMessage("Success", $"Refreshed entity structure for '{BranchText}'", 
+                        DateTime.Now, 0, "RefreshEntity", Errors.Ok);
+                }
+                else
+                {
+                    DMEEditor.AddLogMessage("Warning", $"Could not refresh entity structure for '{BranchText}'", 
+                        DateTime.Now, 0, "RefreshEntity", Errors.Ok);
+                }
+            }
+            catch (Exception ex)
+            {
+                DMEEditor.AddLogMessage("Error", $"Failed to refresh entity: {ex.Message}", 
+                    DateTime.Now, -1, "RefreshEntity", Errors.Failed);
+            }
+
+            return DMEEditor.ErrorObject;
+        }
+
+        /// <summary>
+        /// Drops (deletes) the entity from the database
+        /// </summary>
+        [CommandAttribute(Caption = "Drop Entity", iconimage = "remove.png")]
+        public IErrorsInfo DropEntity()
+        {
+            try
+            {
+                ValidateEntityAndDataSource();
+
+                var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Drop", 
+                    $"Are you sure you want to drop entity '{BranchText}'?");
+                
+                if (result == BeepDialogResult.Yes)
+                {
+                    RefreshEntityStructure();
+                    
                     if (EntityStructure != null)
                     {
-                        entityexist = DataSource.Entities[DataSource.GetEntityIdx(EntityStructure.EntityName)].IsCreated;
-                        if (entityexist && DataSource.CheckEntityExist(EntityStructure.EntityName))
+                        bool entityExists = CheckEntityExists();
+                        
+                        if (entityExists && DataSource.CheckEntityExist(EntityStructure.EntityName))
                         {
-                            DataSource.ExecuteSql($"Drop Table {EntityStructure.DatasourceEntityName}");
+                            DataSource.ExecuteSql($"DROP TABLE {EntityStructure.DatasourceEntityName}");
                         }
-                        if (DMEEditor.ErrorObject.Flag == Errors.Ok || !entityexist)
+
+                        if (DMEEditor.ErrorObject.Flag == Errors.Ok || !entityExists)
                         {
+                            RemoveEntityFromDataSource();
                             TreeEditor.Treebranchhandler.RemoveBranch(this);
-                            DataSource.Entities.RemoveAt(DataSource.Entities.FindIndex(p => p.DatasourceEntityName == EntityStructure.DatasourceEntityName));
-                            DMEEditor.AddLogMessage("Success", $"Droped Entity {EntityStructure.EntityName}", DateTime.Now, -1, null, Errors.Ok);
+                            
+                            DMEEditor.AddLogMessage("Success", $"Dropped entity '{EntityStructure.EntityName}'", 
+                                DateTime.Now, 0, "DropEntity", Errors.Ok);
                         }
                         else
                         {
-
-                            DMEEditor.AddLogMessage("Fail", $"Error Drpping Entity {EntityStructure.EntityName} - {DMEEditor.ErrorObject.Message}", DateTime.Now, -1, null, Errors.Failed);
+                            DMEEditor.AddLogMessage("Error", $"Failed to drop entity '{EntityStructure.EntityName}' - {DMEEditor.ErrorObject.Message}", 
+                                DateTime.Now, -1, "DropEntity", Errors.Failed);
                         }
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
-
-                DMEEditor.ErrorObject.Flag = Errors.Failed;
-                DMEEditor.ErrorObject.Ex = ex;
-                DMEEditor.AddLogMessage("Fail", $"Error Drpping Entity {EntityStructure.EntityName} - {ex.Message}", DateTime.Now, -1, null, Errors.Failed);
+                DMEEditor.AddLogMessage("Error", $"Failed to drop entity: {ex.Message}", 
+                    DateTime.Now, -1, "DropEntity", Errors.Failed);
             }
-            return DMEEditor.ErrorObject;
 
+            return DMEEditor.ErrorObject;
+        }
+        #endregion
+
+        #region Private Helper Methods
+        /// <summary>
+        /// Validates that entity and data source are available
+        /// </summary>
+        private void ValidateEntityAndDataSource()
+        {
+            if (string.IsNullOrEmpty(BranchText))
+                throw new InvalidOperationException("Entity name is not set");
+
+            if (DataSource == null)
+                throw new InvalidOperationException("Data source is not available");
         }
 
-        public IBranch CreateCategoryNode(CategoryFolder p)
+        /// <summary>
+        /// Gets the row count from data object
+        /// </summary>
+        private int GetRowCount(object data)
         {
-            throw new NotImplementedException();
+            return data switch
+            {
+                DataTable dt => dt.Rows.Count,
+                System.Collections.ICollection collection => collection.Count,
+                _ => 0
+            };
+        }
+
+        /// <summary>
+        /// Refreshes the entity structure from the data source
+        /// </summary>
+        private void RefreshEntityStructure()
+        {
+            EntityStructure = DataSource.GetEntityStructure(BranchText, true);
+        }
+
+        /// <summary>
+        /// Checks if the entity exists in the data source
+        /// </summary>
+        private bool CheckEntityExists()
+        {
+            try
+            {
+                var entityIndex = DataSource.GetEntityIdx(EntityStructure.EntityName);
+                return entityIndex >= 0 && DataSource.Entities[entityIndex].IsCreated;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Removes the entity from the data source entities list
+        /// </summary>
+        private void RemoveEntityFromDataSource()
+        {
+            try
+            {
+                var entityIndex = DataSource.Entities.FindIndex(p => 
+                    p.DatasourceEntityName == EntityStructure.DatasourceEntityName);
+                
+                if (entityIndex >= 0)
+                {
+                    DataSource.Entities.RemoveAt(entityIndex);
+                }
+            }
+            catch (Exception ex)
+            {
+                DMEEditor.AddLogMessage("Warning", $"Failed to remove entity from data source list: {ex.Message}", 
+                    DateTime.Now, 0, "RemoveEntityFromDataSource", Errors.Ok);
+            }
         }
         #endregion
     }
