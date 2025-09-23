@@ -343,7 +343,7 @@ namespace Beep.InMemory.Nodes
                     var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Refresh", 
                         "This will refresh the data in memory. Do you want to continue?");
                     
-                    if (result == BeepDialogResult.Yes)
+                    if (result.Result == BeepDialogResult.Yes)
                     {
                         ShowProgressAndExecute("Refreshing data in InMemory database", 
                             (progress, token) => memoryDB.RefreshData(progress, token));
@@ -439,7 +439,7 @@ namespace Beep.InMemory.Nodes
                     var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Clear", 
                         "This will clear all data from memory. Do you want to continue?");
                     
-                    if (result == BeepDialogResult.Yes)
+                    if (result.Result == BeepDialogResult.Yes)
                     {
                         // Implementation depends on IInMemoryDB interface
                         // This is a placeholder for the clear operation
@@ -508,7 +508,7 @@ namespace Beep.InMemory.Nodes
                 var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
                     $"Are you sure you want to remove database '{DataSourceName}'?");
                 
-                if (result == BeepDialogResult.Yes)
+                if (result.Result == BeepDialogResult.Yes)
                 {
                     RemoveChildNodes();
                     TreeEditor?.Treebranchhandler?.RemoveBranch(this);

@@ -394,7 +394,7 @@ namespace Beep.InMemory.Nodes
                 var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
                     $"Are you sure you want to remove all databases from category '{BranchText}'?");
                 
-                if (result == BeepDialogResult.Yes)
+                if (result.Result == BeepDialogResult.Yes)
                 {
                     var databasesToRemove = ChildBranchs
                         .Where(b => b.BranchType == EnumPointType.DataPoint)
@@ -429,7 +429,7 @@ namespace Beep.InMemory.Nodes
                 var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
                     $"Are you sure you want to remove category '{BranchText}'? This will remove all its contents.");
                 
-                if (result == BeepDialogResult.Yes)
+                if (result.Result == BeepDialogResult.Yes)
                 {
                     RemoveChildNodes();
                     TreeEditor?.Treebranchhandler?.RemoveBranch(this);

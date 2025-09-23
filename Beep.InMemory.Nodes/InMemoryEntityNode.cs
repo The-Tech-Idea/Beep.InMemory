@@ -539,7 +539,7 @@ namespace Beep.InMemory.Nodes
                 var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Drop", 
                     $"Are you sure you want to drop entity '{BranchText}'?");
                 
-                if (result == BeepDialogResult.Yes)
+                if (result.Result == BeepDialogResult.Yes)
                 {
                     RefreshEntityStructure();
                     

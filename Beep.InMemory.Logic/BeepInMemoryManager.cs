@@ -27,6 +27,7 @@ namespace Beep.InMemory.Logic
             ConnectionProperties conn = null;
             try
             {
+                DialogReturn res;
                 // Get the available in-memory database classes
                 List<AssemblyClassDefinition> InMemoryDBs = GetInMemoryDBs(DMEEditor);
                 string dbname = "";
@@ -34,13 +35,17 @@ namespace Beep.InMemory.Logic
                 List<string> ls = InMemoryDBs.Select(p => p.className).ToList();
                 if(Vis.DialogManager==null) return null;
                 // Prompt user to select an in-memory database provider
-                if (Vis.DialogManager.InputComboBox("Beep", "Select InMemoryDB Provider", ls, ref classhandle) == BeepDialogResult.OK)
+                res = Vis.DialogManager.InputComboBox("Beep", "Select InMemoryDB Provider", ls);
+                if (res.Result == BeepDialogResult.OK)
                 {
+                    classhandle = res.Value;
                     if (!string.IsNullOrEmpty(classhandle))
                     {
+                        res = Vis.DialogManager.InputBox("Beep", "Enter name for Database");
                         // Prompt user to enter a name for the database
-                        if (Vis.DialogManager.InputBox("Beep", "Enter name for Database", ref dbname) == BeepDialogResult.OK)
+                        if (res.Result == BeepDialogResult.OK)
                         {
+                            dbname=res.Value;
                             if (!string.IsNullOrEmpty(dbname))
                             {
                                 // Create the connection properties

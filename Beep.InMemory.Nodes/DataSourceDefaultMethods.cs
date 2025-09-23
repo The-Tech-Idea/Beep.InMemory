@@ -69,7 +69,7 @@ namespace TheTechIdea.Beep
                     var userConfirmed = Visutil.DialogManager?.InputBoxYesNo("Refresh Entities", 
                         "Are you sure? This might take some time and will reload all entities.");
                     
-                    if (userConfirmed == BeepDialogResult.Yes || userConfirmed == BeepDialogResult.OK)
+                    if (userConfirmed.Result == BeepDialogResult.Yes || userConfirmed.Result == BeepDialogResult.OK)
                     {
                         await ProcessEntityRefresh(DatabaseBranch, dataSource, tree, Visutil, passedArgs, dataSourceName);
                     }

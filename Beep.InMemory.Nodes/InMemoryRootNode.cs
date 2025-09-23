@@ -315,7 +315,7 @@ namespace Beep.InMemory.Nodes
             try
             {
                 if (Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
-                    "Are you sure you want to remove all in-memory databases?") == BeepDialogResult.Yes)
+                    "Are you sure you want to remove all in-memory databases?").Result == BeepDialogResult.Yes)
                 {
                     RemoveChildNodes();
                     DMEEditor.AddLogMessage("Success", "Removed all in-memory databases", 
