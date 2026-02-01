@@ -24,8 +24,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="TheTechIdea.Beep.DataManagementModels" Version="2.0.121" />
-	  <PackageReference Include="TheTechIdea.Beep.Vis.Modules" Version="2.0.34" />
+	  <PackageReference Include="TheTechIdea.Beep.DataManagementModels" Version="2.0.123" />
+	  <PackageReference Include="TheTechIdea.Beep.Vis.Modules" Version="2.0.35" />
 	</ItemGroup>
 	<Target Name="CopyPackage" AfterTargets="Pack">
 		<Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\..\..\LocalNugetFiles" />
