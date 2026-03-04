@@ -1,4 +1,4 @@
-﻿using Beep.InMemory.Nodes;
+using Beep.InMemory.Nodes;
 using TheTechIdea.Beep.DataBase;
 using TheTechIdea.Beep.Vis;
 using TheTechIdea.Beep.Addin;
@@ -66,8 +66,10 @@ namespace TheTechIdea.Beep
 
                 if (dataSource.ConnectionStatus == System.Data.ConnectionState.Open)
                 {
-                    var userConfirmed = Visutil.DialogManager?.InputBoxYesNo("Refresh Entities", 
-                        "Are you sure? This might take some time and will reload all entities.");
+                    var userConfirmed = Visutil.DialogManager != null
+                        ? Visutil.DialogManager.InputBoxYesNoAsync("Refresh Entities",
+                            "Are you sure? This might take some time and will reload all entities.").GetAwaiter().GetResult()
+                        : new DialogReturn { Result = BeepDialogResult.Cancel };
                     
                     if (userConfirmed.Result == BeepDialogResult.Yes || userConfirmed.Result == BeepDialogResult.OK)
                     {

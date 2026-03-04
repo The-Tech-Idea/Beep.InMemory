@@ -1,4 +1,4 @@
-﻿using TheTechIdea.Beep.Vis;
+using TheTechIdea.Beep.Vis;
 using TheTechIdea.Beep.Addin;
 using TheTechIdea.Beep.ConfigUtil;
 using TheTechIdea.Beep.Editor;
@@ -340,8 +340,10 @@ namespace Beep.InMemory.Nodes
 
                 if (memoryDB?.IsLoaded == true)
                 {
-                    var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Refresh", 
-                        "This will refresh the data in memory. Do you want to continue?");
+                    var result = Visutil?.DialogManager != null
+                        ? Visutil.DialogManager.InputBoxYesNoAsync("Confirm Refresh",
+                            "This will refresh the data in memory. Do you want to continue?").GetAwaiter().GetResult()
+                        : new DialogReturn { Result = BeepDialogResult.Cancel };
                     
                     if (result.Result == BeepDialogResult.Yes)
                     {
@@ -436,8 +438,10 @@ namespace Beep.InMemory.Nodes
 
                 if (memoryDB?.IsLoaded == true)
                 {
-                    var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Clear", 
-                        "This will clear all data from memory. Do you want to continue?");
+                    var result = Visutil?.DialogManager != null
+                        ? Visutil.DialogManager.InputBoxYesNoAsync("Confirm Clear",
+                            "This will clear all data from memory. Do you want to continue?").GetAwaiter().GetResult()
+                        : new DialogReturn { Result = BeepDialogResult.Cancel };
                     
                     if (result.Result == BeepDialogResult.Yes)
                     {
@@ -505,8 +509,10 @@ namespace Beep.InMemory.Nodes
         {
             try
             {
-                var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
-                    $"Are you sure you want to remove database '{DataSourceName}'?");
+                var result = Visutil?.DialogManager != null
+                    ? Visutil.DialogManager.InputBoxYesNoAsync("Confirm Removal",
+                        $"Are you sure you want to remove database '{DataSourceName}'?").GetAwaiter().GetResult()
+                    : new DialogReturn { Result = BeepDialogResult.Cancel };
                 
                 if (result.Result == BeepDialogResult.Yes)
                 {

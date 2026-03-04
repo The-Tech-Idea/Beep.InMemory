@@ -1,4 +1,4 @@
-﻿using Beep.InMemory.Logic;
+using Beep.InMemory.Logic;
 using TheTechIdea.Beep;
 using TheTechIdea.Beep.Addin;
 using TheTechIdea.Beep.DataBase;
@@ -314,8 +314,11 @@ namespace Beep.InMemory.Nodes
         {
             try
             {
-                if (Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
-                    "Are you sure you want to remove all in-memory databases?").Result == BeepDialogResult.Yes)
+                var result = Visutil?.DialogManager != null
+                    ? Visutil.DialogManager.InputBoxYesNoAsync("Confirm Removal",
+                        "Are you sure you want to remove all in-memory databases?").GetAwaiter().GetResult()
+                    : new DialogReturn { Result = BeepDialogResult.Cancel };
+                if (result.Result == BeepDialogResult.Yes)
                 {
                     RemoveChildNodes();
                     DMEEditor.AddLogMessage("Success", "Removed all in-memory databases", 

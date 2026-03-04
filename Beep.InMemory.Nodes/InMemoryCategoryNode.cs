@@ -1,4 +1,4 @@
-﻿using TheTechIdea.Beep.Vis;
+using TheTechIdea.Beep.Vis;
 using TheTechIdea.Beep.Addin;
 using TheTechIdea.Beep.ConfigUtil;
 using TheTechIdea.Beep.Editor;
@@ -391,8 +391,10 @@ namespace Beep.InMemory.Nodes
         {
             try
             {
-                var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
-                    $"Are you sure you want to remove all databases from category '{BranchText}'?");
+                var result = Visutil?.DialogManager != null
+                    ? Visutil.DialogManager.InputBoxYesNoAsync("Confirm Removal",
+                        $"Are you sure you want to remove all databases from category '{BranchText}'?").GetAwaiter().GetResult()
+                    : new DialogReturn { Result = BeepDialogResult.Cancel };
                 
                 if (result.Result == BeepDialogResult.Yes)
                 {
@@ -426,8 +428,10 @@ namespace Beep.InMemory.Nodes
         {
             try
             {
-                var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Removal", 
-                    $"Are you sure you want to remove category '{BranchText}'? This will remove all its contents.");
+                var result = Visutil?.DialogManager != null
+                    ? Visutil.DialogManager.InputBoxYesNoAsync("Confirm Removal",
+                        $"Are you sure you want to remove category '{BranchText}'? This will remove all its contents.").GetAwaiter().GetResult()
+                    : new DialogReturn { Result = BeepDialogResult.Cancel };
                 
                 if (result.Result == BeepDialogResult.Yes)
                 {

@@ -1,4 +1,4 @@
-﻿
+
 using TheTechIdea.Beep;
 
 using TheTechIdea.Beep.DataBase;
@@ -35,13 +35,13 @@ namespace Beep.InMemory.Logic
                 List<string> ls = InMemoryDBs.Select(p => p.className).ToList();
                 if(Vis.DialogManager==null) return null;
                 // Prompt user to select an in-memory database provider
-                res = Vis.DialogManager.InputComboBox("Beep", "Select InMemoryDB Provider", ls);
+                res = Vis.DialogManager.InputComboBoxAsync("Beep", "Select InMemoryDB Provider", ls).GetAwaiter().GetResult();
                 if (res.Result == BeepDialogResult.OK)
                 {
                     classhandle = res.Value;
                     if (!string.IsNullOrEmpty(classhandle))
                     {
-                        res = Vis.DialogManager.InputBox("Beep", "Enter name for Database");
+                        res = Vis.DialogManager.InputBoxAsync("Beep", "Enter name for Database").GetAwaiter().GetResult();
                         // Prompt user to enter a name for the database
                         if (res.Result == BeepDialogResult.OK)
                         {

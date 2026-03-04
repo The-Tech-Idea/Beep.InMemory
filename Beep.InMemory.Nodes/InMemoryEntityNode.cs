@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using TheTechIdea.Beep;
 using TheTechIdea.Beep.DataBase;
 using TheTechIdea.Beep.Vis;
@@ -536,8 +536,10 @@ namespace Beep.InMemory.Nodes
             {
                 ValidateEntityAndDataSource();
 
-                var result = Visutil?.DialogManager?.InputBoxYesNo("Confirm Drop", 
-                    $"Are you sure you want to drop entity '{BranchText}'?");
+                var result = Visutil?.DialogManager != null
+                    ? Visutil.DialogManager.InputBoxYesNoAsync("Confirm Drop",
+                        $"Are you sure you want to drop entity '{BranchText}'?").GetAwaiter().GetResult()
+                    : new DialogReturn { Result = BeepDialogResult.Cancel };
                 
                 if (result.Result == BeepDialogResult.Yes)
                 {
